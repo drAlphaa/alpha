@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose
-const { hashPassword } = require('../helpers/bcrypt')
+const { hash } = require('../helpers/bcrypt')
 
 const userSchema = new Schema({
     name: {
@@ -18,11 +18,11 @@ const userSchema = new Schema({
         minlength: [6, 'min 6 char']
     },
     height: {
-        type: String,
+        type: Number,
         required: [true, 'height is required']
     },
     weight: {
-        type: String,
+        type: Number,
         required: [true, 'weight is required']
     }
 }, {versionKey: false})
@@ -41,7 +41,7 @@ function isEmail(value) {
   }
 
 userSchema.pre('save', function(next) {
-    this.password = hashPassword(this.password)
+    this.password = hash(this.password)
     next()
 })
 
