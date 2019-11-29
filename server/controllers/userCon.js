@@ -2,6 +2,7 @@ const User = require('../models/user')
 const { check } = require('../helpers/bcrypt')
 const { generateToken, verifyToken } = require('../helpers/jwt')
 const Bmi = require('../models/bmi')
+const axios = require('axios')
 
 class UserController {
 
@@ -111,6 +112,18 @@ class UserController {
                 res.status(200).json({userData, bmiData})
             })
             .catch(next)
+    }
+
+    static decision(req, res, next) {
+        axios({
+            method: 'GET',
+            url: `https://yesno.wtf/api/`,
+        })
+        .then(result => {
+            console.log(result.data)
+            res.status(200).json({result: result.data.answer})
+        })
+        .catch(next)
     }
 }
 

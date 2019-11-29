@@ -4,18 +4,12 @@ const axios = require('axios')
 class FoodController {
 
     static create(req, res, next) {
-        console.log(req.loggedUser, 'iddddddd')
         axios({
-            method: 'POST',
-            url: `https://api.ocr.space/parse/image`,
-            data: {
-                apikey: process.env.API_KEY,
-                isOverlayRequired: true,
-                url: req.body.url
-            }
+            method: 'GET',
+            url: `https://api.ocr.space/parse/imageurl?apikey=69e2ce192288957&url=${req.body.url}&isOverlayRequired=true`,
         })
         .then(result => {
-            res.status(200).json(result)
+            res.status(200).json(result.data)
             return
             const calorie = result
             const name = req.body.name
