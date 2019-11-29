@@ -8,11 +8,12 @@ class UserController {
 
     static create(req, res, next) {
         console.log('req.body => ',req.body.height);
+        const height = Number(req.body.height)/100
         let bmiData
         let userData
         axios({
             method: 'GET',
-            url: `https://gabamnml-health-v1.p.rapidapi.com/bmi?weight=${Number(req.body.weight)}&height=${Number(req.body.height)}`,
+            url: `https://gabamnml-health-v1.p.rapidapi.com/bmi?weight=${Number(req.body.weight)}&height=${height}`,
             headers: {
                 'X-RapidAPI-Host': 'gabamnml-health-v1.p.rapidapi.com',
                 'X-RapidAPI-Key': 'b38e5cc9a6msh9e13ac7b53da0afp11b383jsn2aa0de8470d4'
@@ -40,10 +41,14 @@ class UserController {
 
     static signin(req, res, next) {
         const {identity, password} = req.body
+        let token
+        let userData = {}
         User.findOne({ 
             $or: [{email: identity}, {name: identity}]
         })
             .then(user => {
+                userData.name = user.name;
+                userData.email = user.email;
                 if (!user) throw {message: 'data not found'}
                 const passwordInput = password
                 const passwordUser = user.password
@@ -54,8 +59,12 @@ class UserController {
                     name: user.name,
                     email: user.email 
                 }
-                const token = generateToken(payload)
-                res.status(200).json({token})
+                token = generateToken(payload)
+                return Bmi.find({userId:payload._id}).sort('-date')
+            })
+            .then(bmis => {
+                let bmiData = bmis[0]
+                res.status(200).json({token, bmiData, name: userData.name, email: userData.email})
             })
             .catch(next)
     }
@@ -83,7 +92,11 @@ class UserController {
                     email: user.email
                 }
                 let token = generateToken(payload)
-                res.status(200).json({token})
+                return Bmi.find({userId:payload._id}).sort('-date')
+            })
+            .then(bmis => {
+                let bmiData = bmis[0]
+                res.status(200).json({token, bmiData})
             })
             .catch(next)
     }
@@ -109,12 +122,13 @@ class UserController {
         const _id = req.loggedUser._id
         let bmiData
         let userData
+        const height = Number(req.body.height)/100
         User.findByIdAndUpdate({_id}, obj, {new: true})
             .then(user => {
                 userData = user
                 return axios({
                             method: 'GET',
-                            url: `https://gabamnml-health-v1.p.rapidapi.com/bmi?weight=${Number(req.body.weight)}&height=${Number(req.body.height)}`,
+                            url: `https://gabamnml-health-v1.p.rapidapi.com/bmi?weight=${Number(req.body.weight)}&height=${height}`,
                             headers: {
                                 'X-RapidAPI-Host': 'gabamnml-health-v1.p.rapidapi.com',
                                 'X-RapidAPI-Key': 'b38e5cc9a6msh9e13ac7b53da0afp11b383jsn2aa0de8470d4'
