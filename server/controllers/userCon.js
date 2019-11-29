@@ -7,16 +7,28 @@ const axios = require('axios')
 class UserController {
 
     static create(req, res, next) {
+        console.log('req.body => ',req.body.height);
         let bmiData
         let userData
-        User.create(req.body)
+        axios({
+            method: 'GET',
+            url: `https://gabamnml-health-v1.p.rapidapi.com/bmi?weight=${Number(req.body.weight)}&height=${Number(req.body.height)}`,
+            headers: {
+                'X-RapidAPI-Host': 'gabamnml-health-v1.p.rapidapi.com',
+                'X-RapidAPI-Key': 'b38e5cc9a6msh9e13ac7b53da0afp11b383jsn2aa0de8470d4'
+            }
+        })
+            .then(result => {
+                bmiData = result.data
+                console.log(bmiData)
+                return User.create(req.body)
+            })      
             .then(user => {
                 userData = user
-                const { weight, height } = user
-                bmiData = weight/(height*height)
                 return Bmi.create({
                     userId: userData._id,
-                    bmi: bmiData,
+                    bmi: bmiData.result,
+                    status: bmiData.status,
                     date: new Date()
                 })
             })
@@ -100,11 +112,22 @@ class UserController {
         User.findByIdAndUpdate({_id}, obj, {new: true})
             .then(user => {
                 userData = user
-                const { weight, height } = user
-                bmiData = weight/(height*height)
+                return axios({
+                            method: 'GET',
+                            url: `https://gabamnml-health-v1.p.rapidapi.com/bmi?weight=${Number(req.body.weight)}&height=${Number(req.body.height)}`,
+                            headers: {
+                                'X-RapidAPI-Host': 'gabamnml-health-v1.p.rapidapi.com',
+                                'X-RapidAPI-Key': 'b38e5cc9a6msh9e13ac7b53da0afp11b383jsn2aa0de8470d4'
+                            }
+                })
+            })
+            .then(result => {
+                bmiData = result.data
+                console.log(bmiData)
                 return Bmi.create({
                     userId: userData._id,
-                    bmi: bmiData,
+                    bmi: bmiData.result,
+                    status: bmiData.status,
                     date: new Date()
                 })
             })
@@ -112,6 +135,7 @@ class UserController {
                 res.status(200).json({userData, bmiData})
             })
             .catch(next)
+
     }
 
     static decision(req, res, next) {
