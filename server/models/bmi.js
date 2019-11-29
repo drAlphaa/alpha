@@ -10,6 +10,7 @@ const bmiSchema = new Schema({
         type: Number,
         required: true
     },
+    status: String,
     date: Date
 }, {versionKey: false})
 
