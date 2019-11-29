@@ -41,7 +41,6 @@ class UserController {
 
     static signin(req, res, next) {
         const {identity, password} = req.body
-        User.findOne({
         let token
         let userData = {}
         User.findOne({
@@ -61,12 +60,12 @@ class UserController {
                     email: user.email
                 }
                 const token = generateToken(payload)
-                res.status(200).json({token, name:user.name, email: user.email})
-                token = generateToken(payload)
                 return Bmi.find({userId:payload._id}).sort('-date')
             })
             .then(bmis => {
                 let bmiData = bmis[0]
+                console.log(bmiData)
+                console.log(userData)
                 res.status(200).json({token, bmiData, name: userData.name, email: userData.email})
             })
             .catch(next)
