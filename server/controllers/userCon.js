@@ -40,6 +40,7 @@ class UserController {
 
     static signin(req, res, next) {
         const {identity, password} = req.body
+        let token
         User.findOne({ 
             $or: [{email: identity}, {name: identity}]
         })
@@ -54,8 +55,12 @@ class UserController {
                     name: user.name,
                     email: user.email 
                 }
-                const token = generateToken(payload)
-                res.status(200).json({token})
+                token = generateToken(payload)
+                return Bmi.find({userId:payload._id}).sort('-date')
+            })
+            .then(bmis => {
+                let bmiData = bmis[0]
+                res.status(200).json({token, bmiData})
             })
             .catch(next)
     }
@@ -83,7 +88,11 @@ class UserController {
                     email: user.email
                 }
                 let token = generateToken(payload)
-                res.status(200).json({token})
+                return Bmi.find({userId:payload._id}).sort('-date')
+            })
+            .then(bmis => {
+                let bmiData = bmis[0]
+                res.status(200).json({token, bmiData})
             })
             .catch(next)
     }
