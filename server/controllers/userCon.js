@@ -27,7 +27,7 @@ class UserController {
 
     static signin(req, res, next) {
         const {identity, password} = req.body
-        User.findOne({ 
+        User.findOne({
             $or: [{email: identity}, {name: identity}]
         })
             .then(user => {
@@ -39,16 +39,16 @@ class UserController {
                 let payload = {
                     _id: user._id,
                     name: user.name,
-                    email: user.email 
+                    email: user.email
                 }
                 const token = generateToken(payload)
-                res.status(200).json({token})
+                res.status(200).json({token, name:user.name, email: user.email})
             })
             .catch(next)
     }
 
     static googleSignin(req, res, next) {
-        
+
         User.findOne({
             email : req.headers.email
         })
